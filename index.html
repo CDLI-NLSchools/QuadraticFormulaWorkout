@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadratic Formula Workout — Math 2201</title>
+<style>
+  :root{
+    --ink:#1c2430; --muted:#5a6572; --accent:#0b5cad; --accent-dark:#084a8a;
+    --ok:#177245; --bad:#b3261e; --card:#ffffff; --bg:#eef2f6; --line:#d4dce4;
+    --soft:#f4f8fc;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.45;}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 14px 48px;}
+  header{margin:10px 0 14px;}
+  h1{font-size:1.7rem;margin:0 0 2px;}
+  .subtitle{color:var(--muted);font-size:1rem;margin:0 0 8px;}
+  .instruction{font-size:1.02rem;margin:0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin:14px 0;box-shadow:0 1px 3px rgba(20,40,60,.06);}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .controls label{font-weight:600;}
+  select,button{font:inherit;}
+  select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:44px;}
+  button{cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;
+    padding:9px 16px;border-radius:8px;min-height:44px;font-weight:600;}
+  button:hover{background:var(--accent-dark);}
+  button.secondary{background:#fff;color:var(--accent);}
+  button.secondary:hover{background:var(--soft);}
+  button:disabled{opacity:.55;cursor:default;}
+  button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f2b01e;outline-offset:2px;}
+  .score{margin-left:auto;color:var(--muted);font-size:.95rem;}
+  .score strong{color:var(--ink);}
+  .equation{font-size:1.45rem;text-align:center;padding:10px 6px 4px;overflow-x:auto;}
+  .eq-label{text-align:center;color:var(--muted);font-size:.92rem;margin:0;}
+  .kindtag{display:inline-block;background:var(--soft);border:1px solid var(--line);
+    border-radius:999px;padding:2px 10px;font-size:.85rem;color:var(--accent-dark);font-weight:600;}
+  .step{border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0;background:#fff;}
+  .step.done{border-color:var(--ok);background:#f2faf5;}
+  .step h3{margin:0 0 6px;font-size:1.05rem;}
+  .step .prompt{margin:0 0 10px;}
+  .fields{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:3px;}
+  .field label{font-size:.85rem;color:var(--muted);font-weight:600;}
+  .field input{width:86px;padding:9px 10px;font:inherit;font-size:1.05rem;border:1px solid var(--line);
+    border-radius:8px;min-height:44px;}
+  .field input:disabled{background:var(--soft);color:var(--muted);}
+  .stepbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .feedback{margin:10px 0 0;min-height:1.3em;font-weight:600;}
+  .feedback.ok{color:var(--ok);}
+  .feedback.bad{color:var(--bad);}
+  .rad{display:inline-block;border-top:2px solid currentColor;padding:0 2px;margin-left:1px;}
+  .template{font-size:1.2rem;display:inline-block;padding:4px 0;}
+  .solution{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;}
+  .solution h3{margin:0 0 8px;}
+  .solution .line{font-size:1.08rem;padding:3px 0;border-bottom:1px dashed var(--line);}
+  .solution .line:last-child{border-bottom:none;}
+  .hidden{display:none !important;}
+  @media (max-width:480px){
+    h1{font-size:1.4rem;}
+    .equation{font-size:1.2rem;}
+    .field input{width:74px;}
+    .score{margin-left:0;width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Quadratic Formula Workout</h1>
+    <p class="subtitle">Math 2201 · Unit 3 — Quadratic Equations</p>
+    <p class="instruction">Solve exactly, one step at a time; check each step as you go.</p>
+  </header>
+
+  <div class="card controls" role="group" aria-label="Problem controls">
+    <label for="kindSelect">Problem type</label>
+    <select id="kindSelect">
+      <option value="rotate" selected>Rotating (all four kinds)</option>
+      <option value="K1">K1 · Direct</option>
+      <option value="K2">K2 · Standard-form first</option>
+      <option value="K3">K3 · Rational roots</option>
+      <option value="K4">K4 · Prime discriminant</option>
+    </select>
+    <button type="button" id="newProblemBtn">New problem</button>
+    <span class="score" id="scoreLine" aria-live="polite"></span>
+  </div>
+
+  <main class="card" id="problemCard">
+    <p class="eq-label"><span class="kindtag" id="kindTag"></span></p>
+    <div class="equation" id="equationDisplay"></div>
+    <p class="eq-label" id="equationHint"></p>
+    <div id="stepsContainer"></div>
+    <div class="stepbtns">
+      <button type="button" class="secondary" id="showSolutionBtn">Show worked solution</button>
+    </div>
+    <div class="solution hidden" id="solutionPanel" aria-live="polite">
+      <h3>Worked solution</h3>
+      <div id="solutionLines"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+"use strict";
+// === CORE START ===
+// Pure generator / answer-key / checking functions. No DOM access in this section.
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b !== 0) { var t = a % b; a = b; b = t; }
+  return a;
+}
+function gcd3(a, b, c) { return gcd(gcd(a, b), c); }
+
+function isSquarefree(n) {
+  n = Math.abs(n);
+  if (n === 0) return false;
+  for (var i = 2; i * i <= n; i++) {
+    if (n % (i * i) === 0) return false;
+  }
+  return true;
+}
+
+function isPrime(n) {
+  if (n < 2) return false;
+  for (var i = 2; i * i <= n; i++) { if (n % i === 0) return false; }
+  return true;
+}
+
+// For n > 0: returns {coeff, radicand} with n = coeff^2 * radicand, radicand squarefree.
+function extractSquare(n) {
+  var coeff = 1, radicand = n;
+  for (var i = 2; i * i <= radicand; i++) {
+    while (radicand % (i * i) === 0) { radicand = radicand / (i * i); coeff = coeff * i; }
+  }
+  return { coeff: coeff, radicand: radicand };
+}
+
+function reduceFraction(num, den) {
+  if (den === 0) return null;
+  if (num === 0) return { num: 0, den: 1 };
+  var g = gcd(num, den);
+  num = num / g; den = den / g;
+  if (den < 0) { den = -den; num = -num; }
+  return { num: num, den: den };
+}
+
+function randInt(min, max) { // inclusive
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+function pickFrom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Canonical key from a, b, c (a > 0, D > 0 assumed; D = 0 also handled).
+// Returns discriminant, sqrt decomposition, and the exact root form:
+//   radical form: roots = (p ± q*sqrt(r)) / s, lowest terms, s > 0, r squarefree > 1
+//   rational form (r == 1): rationalRoots = [{num,den},{num,den}] each reduced.
+function computeKeyFromABC(a, b, c) {
+  var D = b * b - 4 * a * c;
+  var key = { a: a, b: b, c: c, discriminant: D };
+  if (D < 0) { key.form = "none"; return key; }
+  var sq = extractSquare(D);
+  key.sqrtCoeff = sq.coeff;       // sqrt(D) = sqrtCoeff * sqrt(sqrtRadicand)
+  key.sqrtRadicand = sq.radicand;
+  var p0 = -b, q0 = sq.coeff, s0 = 2 * a;
+  if (s0 < 0) { s0 = -s0; p0 = -p0; }
+  var g = gcd3(Math.abs(p0), q0, Math.abs(s0));
+  if (g > 1) { p0 = p0 / g; q0 = q0 / g; s0 = s0 / g; }
+  key.p = p0; key.q = q0; key.r = sq.radicand; key.s = s0;
+  if (sq.radicand === 1) {
+    key.form = "rational";
+    key.sqrtInteger = sq.coeff;
+    var r1 = reduceFraction(p0 + q0, s0);
+    var r2 = reduceFraction(p0 - q0, s0);
+    key.rationalRoots = [r1, r2];
+  } else {
+    key.form = "radical";
+  }
+  return key;
+}
+
+function makeProblem(kind, key, presentation) {
+  var labels = {
+    K1: "K1 · Direct",
+    K2: "K2 · Standard-form first",
+    K3: "K3 · Rational roots",
+    K4: "K4 · Prime discriminant"
+  };
+  var prob = {
+    kind: kind,
+    kindLabel: labels[kind],
+    a: key.a, b: key.b, c: key.c,
+    discriminant: key.discriminant,
+    sqrtCoeff: key.sqrtCoeff,
+    sqrtRadicand: key.sqrtRadicand,
+    form: key.form,
+    presentation: presentation || null
+  };
+  if (key.form === "radical") {
+    prob.p = key.p; prob.q = key.q; prob.r = key.r; prob.s = key.s;
+  } else if (key.form === "rational") {
+    prob.sqrtInteger = key.sqrtInteger;
+    prob.rationalRoots = key.rationalRoots;
+    // Also expose the pre-reduction (p ± q)/s description for solution text.
+    prob.p = key.p; prob.q = key.q; prob.s = key.s; prob.r = 1;
+  }
+  prob.presentedText = presentation ? presentation.text : formatStandardEquation(key.a, key.b, key.c);
+  return prob;
+}
+
+// K1: build backwards from (p ± q√r)/s in lowest terms; identity (s x − p)² = q²r
+// expanded and reduced gives a = s², b = −2ps, c = p² − q²r, D = 4s²q²r (simplifiable).
+function generateK1() {
+  var radicands = [2, 3, 5, 6, 7, 10, 11, 13, 14, 15, 17, 19, 21, 22, 23, 26, 29, 30];
+  for (var tries = 0; tries < 5000; tries++) {
+    var s = randInt(1, 3);
+    var q = randInt(1, 3);
+    var r = pickFrom(radicands);
+    var p = 0;
+    while (p === 0) p = randInt(-9, 9);
+    if (gcd3(Math.abs(p), q, s) !== 1) continue;
+    var a = s * s;
+    var b = -2 * p * s;
+    var c = p * p - q * q * r;
+    if (c === 0) continue;
+    var key = computeKeyFromABC(a, b, c);
+    if (key.form !== "radical") continue;
+    if (key.sqrtCoeff < 2) continue; // discriminant radical must be simplifiable
+    // Confirm the backward construction recovered the intended answer form.
+    if (key.p !== p || key.q !== q || key.r !== r || key.s !== s) continue;
+    return makeProblem("K1", key, null);
+  }
+  throw new Error("K1 generation failed");
+}
+
+// K4: sample small a, b, c until D is prime (so √D is irreducible, coefficient 1).
+function generateK4() {
+  for (var tries = 0; tries < 20000; tries++) {
+    var a = randInt(1, 4);
+    var b = randInt(-11, 11);
+    var c = randInt(-11, 11);
+    if (c === 0) continue;
+    var D = b * b - 4 * a * c;
+    if (D <= 1) continue;
+    if (!isPrime(D)) continue;
+    var key = computeKeyFromABC(a, b, c);
+    if (key.form !== "radical") continue;
+    if (key.sqrtCoeff !== 1) continue;
+    if (key.q !== 1) continue;
+    return makeProblem("K4", key, null);
+  }
+  throw new Error("K4 generation failed");
+}
+
+// K3: build from two distinct rational roots f1/g1 and f2/g2 (lowest terms).
+function generateK3() {
+  for (var tries = 0; tries < 5000; tries++) {
+    var g1 = randInt(1, 3), g2 = randInt(1, 3);
+    var f1 = 0, f2 = 0;
+    while (f1 === 0) f1 = randInt(-9, 9);
+    while (f2 === 0) f2 = randInt(-9, 9);
+    if (gcd(Math.abs(f1), g1) !== 1 || gcd(Math.abs(f2), g2) !== 1) continue;
+    if (f1 * g2 === f2 * g1) continue; // roots must be distinct
+    var a = g1 * g2;
+    var b = -(f1 * g2 + f2 * g1);
+    var c = f1 * f2;
+    var key = computeKeyFromABC(a, b, c);
+    if (key.form !== "rational") continue;
+    if (key.discriminant <= 0) continue;
+    return makeProblem("K3", key, null);
+  }
+  throw new Error("K3 generation failed");
+}
+
+// Signed term like "+ 3" / "- 3" for use inside (x + 3) style presentations.
+function signedInside(n) {
+  return n >= 0 ? "+ " + n : "- " + Math.abs(n);
+}
+
+// K2: choose the presentation first, expand to a, b, c, compute the key with the
+// formula machinery; resample unless D is a perfect square or has a simplifiable radical.
+function generateK2() {
+  for (var tries = 0; tries < 20000; tries++) {
+    var presentation, a, b, c;
+    if (Math.random() < 0.5) {
+      // Form A: pa * x * (x - k) = m   ->  pa x² - pa*k x - m = 0
+      var pa = randInt(1, 3);
+      var k = 0;
+      while (k === 0) k = randInt(-6, 6);
+      var m = 0;
+      while (m === 0) m = randInt(-20, 20);
+      a = pa; b = -pa * k; c = -m;
+      var kTxt = k >= 0 ? "x - " + k : "x + " + Math.abs(k);
+      var aTxt = pa === 1 ? "" : String(pa);
+      presentation = {
+        type: "A",
+        text: aTxt + "x(" + kTxt + ") = " + m,
+        pa: pa, k: k, m: m
+      };
+    } else {
+      // Form B: (x + p)(x + q) = r   ->  x² + (p+q) x + (pq - r) = 0
+      var pp = randInt(-7, 7);
+      var qq = randInt(-7, 7);
+      var rr = randInt(-20, 30);
+      a = 1; b = pp + qq; c = pp * qq - rr;
+      presentation = {
+        type: "B",
+        text: "(x " + signedInside(pp) + ")(x " + signedInside(qq) + ") = " + rr,
+        p: pp, q: qq, r: rr
+      };
+    }
+    if (c === 0 && b === 0) continue;
+    var D = b * b - 4 * a * c;
+    if (D <= 0) continue;
+    var sq = extractSquare(D);
+    var isSquareType = (sq.radicand === 1);
+    var isSimplifiableType = (sq.radicand > 1 && sq.coeff > 1);
+    if (!isSquareType && !isSimplifiableType) continue;
+    var key = computeKeyFromABC(a, b, c);
+    if (key.form !== "radical" && key.form !== "rational") continue;
+    return makeProblem("K2", key, presentation);
+  }
+  throw new Error("K2 generation failed");
+}
+
+function generateProblem(kind) {
+  if (kind === "K1") return generateK1();
+  if (kind === "K2") return generateK2();
+  if (kind === "K3") return generateK3();
+  if (kind === "K4") return generateK4();
+  throw new Error("Unknown kind: " + kind);
+}
+
+// ---- Checking ----
+
+function checkABC(prob, a, b, c) {
+  return a === prob.a && b === prob.b && c === prob.c;
+}
+
+function checkDiscriminant(prob, d) {
+  return d === prob.discriminant;
+}
+
+// Step 3 for radical problems: sqrt(D) entered as coeff * sqrt(radicand), must be fully simplified.
+function checkStep3Radical(prob, coeff, radicand) {
+  return coeff === prob.sqrtCoeff && radicand === prob.sqrtRadicand;
+}
+
+// Step 3 for rational (K3 / square K2): integer square root of D.
+function checkStep3Integer(prob, v) {
+  return prob.form === "rational" && v === prob.sqrtInteger;
+}
+
+// Canonicalize a student-entered radical answer (p ± q√r)/s:
+// force s > 0, take q >= 0, reduce the radical q√r to coeff*sqrt(squarefree),
+// then divide p, coeff, s by their gcd. Returns null for invalid input.
+function canonicalRadical(p, q, r, s) {
+  if (s === 0 || r <= 0 || q === 0) return null;
+  if (s < 0) { s = -s; p = -p; }
+  q = Math.abs(q);
+  var sq = extractSquare(q * q * r); // value of q√r is sq.coeff * √(sq.radicand)
+  var coeff = sq.coeff, radicand = sq.radicand;
+  var g = gcd3(Math.abs(p), coeff, s);
+  return { p: p / g, q: coeff / g, r: radicand, s: s / g };
+}
+
+function checkRootsRadical(prob, p, q, r, s) {
+  if (prob.form !== "radical") return false;
+  var can = canonicalRadical(p, q, r, s);
+  if (!can) return false;
+  return can.p === prob.p && can.q === prob.q && can.r === prob.r && can.s === prob.s;
+}
+
+// Step 4 for rational problems: two fractions, either order, equivalence by reduction.
+function checkRootsRational(prob, n1, d1, n2, d2) {
+  if (prob.form !== "rational") return false;
+  var e1 = reduceFraction(n1, d1);
+  var e2 = reduceFraction(n2, d2);
+  if (!e1 || !e2) return false;
+  var k1 = prob.rationalRoots[0], k2 = prob.rationalRoots[1];
+  function eq(x, y) { return x.num === y.num && x.den === y.den; }
+  return (eq(e1, k1) && eq(e2, k2)) || (eq(e1, k2) && eq(e2, k1));
+}
+
+// Numeric values of the key roots (for verification).
+function keyRootValues(prob) {
+  if (prob.form === "rational") {
+    return [prob.rationalRoots[0].num / prob.rationalRoots[0].den,
+            prob.rationalRoots[1].num / prob.rationalRoots[1].den];
+  }
+  var root = Math.sqrt(prob.r);
+  return [(prob.p + prob.q * root) / prob.s,
+          (prob.p - prob.q * root) / prob.s];
+}
+
+// ---- Text formatting (plain text, Unicode) ----
+
+function formatStandardEquation(a, b, c) {
+  var parts = [];
+  function term(coef, suffix, first) {
+    if (coef === 0) return "";
+    var sign;
+    if (first) sign = coef < 0 ? "-" : "";
+    else sign = coef < 0 ? " - " : " + ";
+    var mag = Math.abs(coef);
+    var magTxt = (suffix !== "" && mag === 1) ? "" : String(mag);
+    return sign + magTxt + suffix;
+  }
+  parts.push(term(a, "x²", true));
+  parts.push(term(b, "x", parts.join("") === ""));
+  parts.push(term(c, "", parts.join("") === ""));
+  return parts.join("") + " = 0";
+}
+
+function formatRadicalTerm(q, r) {
+  // q√r with q omitted when 1
+  return (q === 1 ? "" : String(q)) + "√" + r;
+}
+
+function formatRootExpression(p, q, r, s) {
+  var rad = formatRadicalTerm(q, r);
+  var num;
+  if (p === 0) num = "± " + rad;
+  else num = p + " ± " + rad;
+  if (s === 1) return p === 0 ? num : "(" + num + ")";
+  return "(" + num + ") / " + s;
+}
+
+function formatFraction(fr) {
+  return fr.den === 1 ? String(fr.num) : fr.num + "/" + fr.den;
+}
+
+// Full worked solution, one step per line, exact form.
+function workedSolutionLines(prob) {
+  var lines = [];
+  if (prob.presentation) {
+    lines.push("Given: " + prob.presentation.text);
+    lines.push("Standard form: " + formatStandardEquation(prob.a, prob.b, prob.c));
+  } else {
+    lines.push("Equation: " + formatStandardEquation(prob.a, prob.b, prob.c));
+  }
+  lines.push("a = " + prob.a + ",  b = " + prob.b + ",  c = " + prob.c);
+  lines.push("Discriminant: D = b² - 4ac = (" + prob.b + ")² - 4(" + prob.a + ")(" + prob.c + ") = " + prob.discriminant);
+  if (prob.form === "rational") {
+    lines.push("√D = √" + prob.discriminant + " = " + prob.sqrtInteger);
+    lines.push("x = (-b ± √D) / (2a) = (" + (-prob.b) + " ± " + prob.sqrtInteger + ") / " + (2 * prob.a));
+    lines.push("Roots: x = " + formatFraction(prob.rationalRoots[0]) + "  or  x = " + formatFraction(prob.rationalRoots[1]));
+  } else {
+    if (prob.sqrtCoeff === 1) {
+      lines.push("√D = √" + prob.discriminant + " (cannot be simplified)");
+    } else {
+      lines.push("√D = √" + prob.discriminant + " = " + prob.sqrtCoeff + "√" + prob.sqrtRadicand);
+    }
+    lines.push("x = (-b ± √D) / (2a) = (" + (-prob.b) + " ± " + formatRadicalTerm(prob.sqrtCoeff, prob.sqrtRadicand) + ") / " + (2 * prob.a));
+    lines.push("Roots: x = " + formatRootExpression(prob.p, prob.q, prob.r, prob.s));
+  }
+  return lines;
+}
+// === CORE END ===
+
+// ---- UI ----
+
+var KINDS = ["K1", "K2", "K3", "K4"];
+var rotateIndex = 0;
+var completedCount = 0;
+var current = null;
+var stepState = {};   // stepId -> true when checked correct or revealed
+var countedCurrent = false;
+
+var kindSelect = document.getElementById("kindSelect");
+var newProblemBtn = document.getElementById("newProblemBtn");
+var scoreLine = document.getElementById("scoreLine");
+var kindTag = document.getElementById("kindTag");
+var equationDisplay = document.getElementById("equationDisplay");
+var equationHint = document.getElementById("equationHint");
+var stepsContainer = document.getElementById("stepsContainer");
+var solutionPanel = document.getElementById("solutionPanel");
+var solutionLines = document.getElementById("solutionLines");
+var showSolutionBtn = document.getElementById("showSolutionBtn");
+
+function updateScore() {
+  var kindTxt = current ? current.kindLabel : "";
+  scoreLine.innerHTML = "Problems completed: <strong>" + completedCount + "</strong>" +
+    (kindTxt ? " · Current kind: <strong>" + kindTxt + "</strong>" : "");
+}
+
+// Render the presented equation as HTML with sup and overline-radical spans.
+function equationHTML(prob) {
+  if (prob.presentation) {
+    return escapeHTML(prob.presentedText).replace(/x/g, "x");
+  }
+  return standardEquationHTML(prob.a, prob.b, prob.c);
+}
+function escapeHTML(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function standardEquationHTML(a, b, c) {
+  function term(coef, suffix, first) {
+    if (coef === 0) return "";
+    var sign = first ? (coef < 0 ? "−" : "") : (coef < 0 ? " − " : " + ");
+    var mag = Math.abs(coef);
+    var magTxt = (suffix !== "" && mag === 1) ? "" : String(mag);
+    return sign + magTxt + suffix;
+  }
+  var html = term(a, "x<sup>2</sup>", true);
+  html += term(b, "x", html === "");
+  html += term(c, "", html === "");
+  return html + " = 0";
+}
+function radicalHTML(q, r) {
+  return (q === 1 ? "" : String(q)) + "√<span class=\"rad\">" + r + "</span>";
+}
+
+function parseIntField(el) {
+  var v = el.value.trim();
+  if (!/^[+-]?\d+$/.test(v)) return null;
+  return parseInt(v, 10);
+}
+
+function makeField(id, label) {
+  var wrap = document.createElement("div");
+  wrap.className = "field";
+  var lab = document.createElement("label");
+  lab.setAttribute("for", id);
+  lab.textContent = label;
+  var input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.id = id;
+  wrap.appendChild(lab);
+  wrap.appendChild(input);
+  return { wrap: wrap, input: input };
+}
+
+function buildStep(stepId, title, promptHTML, fields, correctValues, checker, revealValues) {
+  var card = document.createElement("section");
+  card.className = "step";
+  card.id = "step-" + stepId;
+  var h = document.createElement("h3");
+  h.textContent = title;
+  card.appendChild(h);
+  var prompt = document.createElement("p");
+  prompt.className = "prompt";
+  prompt.innerHTML = promptHTML;
+  card.appendChild(prompt);
+  var fieldsDiv = document.createElement("div");
+  fieldsDiv.className = "fields";
+  var inputs = [];
+  fields.forEach(function (f) {
+    var made = makeField("in-" + stepId + "-" + f.key, f.label);
+    fieldsDiv.appendChild(made.wrap);
+    inputs.push({ key: f.key, input: made.input });
+  });
+  card.appendChild(fieldsDiv);
+  var btns = document.createElement("div");
+  btns.className = "stepbtns";
+  var checkBtn = document.createElement("button");
+  checkBtn.type = "button";
+  checkBtn.textContent = "Check";
+  var revealBtn = document.createElement("button");
+  revealBtn.type = "button";
+  revealBtn.className = "secondary";
+  revealBtn.textContent = "Show this step";
+  btns.appendChild(checkBtn);
+  btns.appendChild(revealBtn);
+  card.appendChild(btns);
+  var feedback = document.createElement("p");
+  feedback.className = "feedback";
+  feedback.setAttribute("aria-live", "polite");
+  card.appendChild(feedback);
+
+  function finishStep(wasReveal) {
+    stepState[stepId] = true;
+    card.classList.add("done");
+    inputs.forEach(function (it) { it.input.disabled = true; });
+    checkBtn.disabled = true;
+    revealBtn.disabled = true;
+    feedback.className = "feedback ok";
+    feedback.textContent = wasReveal ? "Step shown. Try the next one yourself." : "✓ Correct.";
+    maybeComplete();
+  }
+  checkBtn.addEventListener("click", function () {
+    var vals = {};
+    var okParse = true;
+    inputs.forEach(function (it) {
+      var v = parseIntField(it.input);
+      if (v === null) okParse = false;
+      vals[it.key] = v;
+    });
+    if (!okParse) {
+      feedback.className = "feedback bad";
+      feedback.textContent = "Enter a whole number in every box first.";
+      return;
+    }
+    if (checker(vals)) {
+      finishStep(false);
+    } else {
+      feedback.className = "feedback bad";
+      feedback.textContent = "✗ Not yet — check your work and try again.";
+    }
+  });
+  revealBtn.addEventListener("click", function () {
+    inputs.forEach(function (it) { it.input.value = String(revealValues[it.key]); });
+    finishStep(true);
+  });
+  return card;
+}
+
+function maybeComplete() {
+  var ids = Object.keys(stepState);
+  var all = ids.length > 0 && ids.every(function (k) { return stepState[k]; });
+  if (all && !countedCurrent) {
+    countedCurrent = true;
+    completedCount++;
+    updateScore();
+    showSolution();
+  }
+}
+
+function showSolution() {
+  if (!current) return;
+  solutionLines.innerHTML = "";
+  workedSolutionLines(current).forEach(function (line) {
+    var d = document.createElement("div");
+    d.className = "line";
+    d.textContent = line;
+    solutionLines.appendChild(d);
+  });
+  solutionPanel.classList.remove("hidden");
+}
+
+function newProblem() {
+  var mode = kindSelect.value;
+  var kind;
+  if (mode === "rotate") {
+    kind = KINDS[rotateIndex % KINDS.length];
+    rotateIndex++;
+  } else {
+    kind = mode;
+  }
+  current = generateProblem(kind);
+  countedCurrent = false;
+  stepState = {};
+  solutionPanel.classList.add("hidden");
+  solutionLines.innerHTML = "";
+  kindTag.textContent = current.kindLabel;
+  equationDisplay.innerHTML = current.presentation
+    ? escapeHTML(current.presentedText)
+    : standardEquationHTML(current.a, current.b, current.c);
+  equationHint.textContent = current.presentation
+    ? "First put it in standard form: ax² + bx + c = 0."
+    : "Solve for exact roots using the quadratic formula.";
+  updateScore();
+  stepsContainer.innerHTML = "";
+
+  var stepNum = 1;
+  function label(base) { return "Step " + (stepNum++) + " — " + base; }
+
+  if (current.kind === "K2") {
+    stepsContainer.appendChild(buildStep(
+      "abc", label("Standard form"),
+      "Enter the values of a, b and c for this equation in standard form.",
+      [{ key: "a", label: "a" }, { key: "b", label: "b" }, { key: "c", label: "c" }],
+      null,
+      function (v) { return checkABC(current, v.a, v.b, v.c); },
+      { a: current.a, b: current.b, c: current.c }
+    ));
+  }
+
+  stepsContainer.appendChild(buildStep(
+    "disc", label("Discriminant"),
+    "Enter the discriminant, D = b<sup>2</sup> − 4ac.",
+    [{ key: "d", label: "D" }],
+    null,
+    function (v) { return checkDiscriminant(current, v.d); },
+    { d: current.discriminant }
+  ));
+
+  if (current.form === "rational") {
+    stepsContainer.appendChild(buildStep(
+      "sqrt", label("Square root of the discriminant"),
+      "The discriminant is a perfect square. Enter √D as a whole number.",
+      [{ key: "v", label: "√D" }],
+      null,
+      function (v) { return checkStep3Integer(current, v.v); },
+      { v: current.sqrtInteger }
+    ));
+    stepsContainer.appendChild(buildStep(
+      "roots", label("The roots"),
+      "Enter each root as a fraction (numerator / denominator). Either order is fine.",
+      [{ key: "n1", label: "Root 1 numerator" }, { key: "d1", label: "Root 1 denominator" },
+       { key: "n2", label: "Root 2 numerator" }, { key: "d2", label: "Root 2 denominator" }],
+      null,
+      function (v) { return checkRootsRational(current, v.n1, v.d1, v.n2, v.d2); },
+      { n1: current.rationalRoots[0].num, d1: current.rationalRoots[0].den,
+        n2: current.rationalRoots[1].num, d2: current.rationalRoots[1].den }
+    ));
+  } else {
+    stepsContainer.appendChild(buildStep(
+      "sqrt", label("Simplify the radical"),
+      "Simplify √D and enter it as a coefficient times a radical: √D = q√<span class=\"rad\">r</span>.",
+      [{ key: "coeff", label: "coefficient" }, { key: "rad", label: "radicand" }],
+      null,
+      function (v) { return checkStep3Radical(current, v.coeff, v.rad); },
+      { coeff: current.sqrtCoeff, rad: current.sqrtRadicand }
+    ));
+    var tmpl = "<span class=\"template\">x = ( p ± q√<span class=\"rad\">r</span> ) / s</span><br>" +
+      "Enter p, q, r and s for the roots in lowest terms (s &gt; 0).";
+    stepsContainer.appendChild(buildStep(
+      "roots", label("The roots"),
+      tmpl,
+      [{ key: "p", label: "p" }, { key: "q", label: "q" }, { key: "r", label: "r" }, { key: "s", label: "s" }],
+      null,
+      function (v) { return checkRootsRadical(current, v.p, v.q, v.r, v.s); },
+      { p: current.p, q: current.q, r: current.r, s: current.s }
+    ));
+  }
+
+  var firstInput = stepsContainer.querySelector("input");
+  if (firstInput) firstInput.focus();
+}
+
+newProblemBtn.addEventListener("click", newProblem);
+showSolutionBtn.addEventListener("click", showSolution);
+newProblem();
+</script>
+</body>
+</html>
