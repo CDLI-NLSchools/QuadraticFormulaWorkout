@@ -535,6 +535,7 @@ function makeField(id, label) {
 }
 
 function buildStep(stepId, title, promptHTML, fields, correctValues, checker, revealValues) {
+  stepState[stepId] = false;  // register as incomplete so maybeComplete() waits for every step
   var card = document.createElement("section");
   card.className = "step";
   card.id = "step-" + stepId;
